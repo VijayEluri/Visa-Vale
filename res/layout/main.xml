@@ -2,9 +2,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
+
+
+	<ImageView android:id="@+id/img_1" android:src="@drawable/logo"
+		android:layout_width="200dip" android:layout_height="200dip"
+		android:layout_weight="0" android:layout_gravity="center"
+		android:scaleType="fitXY" />
+
+
+<TextView android:id="@+id/text" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:gravity="center"
+		
+		android:text="Numero do Cartão:" />
+
+
 	<EditText android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:id="@+id/cardNumber"
-		android:text="4058780830950010" />
+		android:text="" />
+
 
 	<Button android:id="@+id/button" android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:text="Verificar Saldo" />
@@ -13,5 +28,7 @@
 		android:layout_height="wrap_content" android:gravity="center"
 		android:textAppearance="?android:attr/textAppearanceLarge"
 		android:text="" />
+
+
 
 </LinearLayout>

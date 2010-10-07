@@ -1,5 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
     <string name="app_name">Visa Vale</string>
     <string name="hint_text">Some hint text...</string>
+<string name="sample_pick_item">Pick an Item</string>
+    <string name="sample_show_dialog">Show Dialog</string>
+    <string-array name="sample_dialog_items">
+        <item>List Item 1</item>
+        <item>List Item 2</item>
+        <item>List Item 3</item>
+        <item>List Item 4</item>
+    </string-array>
 </resources>

@@ -17,6 +17,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
@@ -82,9 +83,8 @@ public class Main extends Activity {
 						if(line.contains("Saldo d") )
 						{
 							sb.append(line.replaceAll("\\<.*?>","").replaceAll("dispo.*vel:", " : ").trim());
-							sb.append("\n");
-							sb.append(getDate());
 						}
+						
 					}
 				} catch (Exception e) {
 					result = "Erro carregando dados.";
@@ -151,7 +151,11 @@ public class Main extends Activity {
 			});
 			alertDialog.show();
 			break;
+		case R.id.menu_history:
+			startActivity(new Intent(this, History.class));
+			break;
 		}
+
 		return true;
 	}
 }

@@ -10,8 +10,13 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -94,4 +99,39 @@ public class Main extends Activity {
 		}
 
 	}
+	
+	@Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+        return true;
+    }
+	
+	 @Override
+	    public boolean onOptionsItemSelected(MenuItem item) {
+	        switch(item.getItemId()) {
+	        case R.id.menu_quit:
+	               finish();
+	                break;
+	        case R.id.menu_about:
+	                final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+	                alertDialog.setIcon(R.drawable.icon);
+	                alertDialog.setTitle("Visa Vale");
+	                alertDialog.setMessage("Desenvolvido por Alexandre Possebom <alexandrepossebom@gmail.com>");
+	                alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+	                        public void onClick(DialogInterface dialog, int which) {
+	                                alertDialog.dismiss();
+	                        }
+	                });
+	                alertDialog.show();
+	                break;
+//	        case R.id.menu_prefs:
+//	                startActivityForResult(new Intent(this, Preferences.class), PREFS_REQUEST);
+//	                break;
+	        }
+	        return true;
+	    }
+
+	
+	
 }

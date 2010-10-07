@@ -10,15 +10,15 @@
 		android:scaleType="fitXY" />
 
 
-<TextView android:id="@+id/text" android:layout_width="fill_parent"
+	<TextView android:id="@+id/text" android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:gravity="center"
-		
+
 		android:text="Numero do Cartão:" />
 
 
 	<EditText android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:id="@+id/cardNumber"
-		android:text="" />
+		android:text="" android:inputType="number"/>
 
 
 	<Button android:id="@+id/button" android:layout_width="fill_parent"

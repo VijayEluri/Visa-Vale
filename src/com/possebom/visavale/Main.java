@@ -1,11 +1,16 @@
 package com.possebom.visavale;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.StringReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -46,92 +51,107 @@ public class Main extends Activity {
 
 	private String getUrl() {
 		final EditText cardNumber = (EditText)findViewById(R.id.cardNumber); 
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet post = new HttpGet("http://www.cbss.com.br/inst/convivencia/SaldoExtrato.jsp?numeroCartao=" + cardNumber.getText());
-		ByteArrayOutputStream buf = null;
+		URI myURL = null;
 		try {
-			HttpResponse response = httpclient.execute(post);            		
-			BufferedInputStream bis = new BufferedInputStream(response.getEntity().getContent());
-			buf = new ByteArrayOutputStream();
-			int result = bis.read();
-			while(result != -1) {
-				byte b = (byte)result;
-				buf.write(b);
-				result = bis.read();
-			}   
-		} catch (Exception e) {
-			return e.toString();
+			myURL = new URI("http://www.cbss.com.br/inst/convivencia/SaldoExtrato.jsp?numeroCartao=" + cardNumber.getText());
+		} catch (URISyntaxException e1) {
+			e1.printStackTrace();
 		}
-		return buf.toString();
+
+		HttpClient httpClient = new DefaultHttpClient();
+		HttpGet getMethod = new HttpGet(myURL);
+		HttpResponse httpResponse;
+
+		String result = "Erro pegando dados.";
+
+		try {
+			httpResponse = httpClient.execute(getMethod);
+			HttpEntity entity = httpResponse.getEntity();
+			if (entity != null) {
+				InputStream instream = entity.getContent();
+				BufferedReader reader = new BufferedReader( new InputStreamReader(instream));
+				StringBuilder sb = new StringBuilder();
+				String line = null;
+				try {
+					while ((line = reader.readLine()) != null) {
+						if(line.contains("lido."))
+						{
+							sb.append("Cartão Inválido");
+							break;
+						}
+						if(line.contains("Saldo d") )
+						{
+							sb.append(line.replaceAll("\\<.*?>","").replaceAll("dispo.*vel:", " : ").trim());
+							sb.append("\n");
+							sb.append(getDate());
+						}
+					}
+				} catch (Exception e) {
+					result = "Erro carregando dados.";
+				} finally {
+					try {
+						instream.close();
+					} catch (Exception e) {
+						result = "Erro carregando dados.";
+					}
+				}
+				result = sb.toString();
+			}
+		} catch (Exception e) {
+			result = "Erro carregando dados.";
+		}
+		return result;
+	}
+
+
+	public static String getDate() {
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM HH:mm");
+		return sdf.format(cal.getTime());
 	}
 
 	private void updateView() {          
 		final TextView view = (TextView)findViewById(R.id.view);
 		final EditText cardNumber = (EditText)findViewById(R.id.cardNumber); 
+		view.setText("Carregando dados...");
 		String data = getUrl();
-		StringBuffer strBuf = new StringBuffer();
-		try {
-			BufferedReader br = new BufferedReader(new StringReader(data));
-			String temp       = br.readLine();
-
-			while(temp != null) {
-				if(temp.contains("lido."))
-				{
-					strBuf.append("Cartão Inválido");
-					break;
-				}
-				if(temp.contains("Saldo d") )
-					strBuf.append(temp.replaceAll("\\<.*?>","").replaceAll("dispo.*vel:", " : ").trim());
-				temp = br.readLine();
-			}
-			//Log.v("VISA",strBuf.toString());
-			if(strBuf.toString().contains("Saldo"))
-			{
-				SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-				SharedPreferences.Editor editor = settings.edit();
-				editor.putString("saldo", strBuf.toString());
-				editor.putString("cardNumber", cardNumber.getText().toString());
-				editor.commit();
-			}
-			view.setText(strBuf.toString());
-		} catch (Exception e){
-			view.setText(e.toString());
+		if(data.contains("Saldo"))
+		{
+			SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putString("saldo", data);
+			editor.putString("cardNumber", cardNumber.getText().toString());
+			editor.commit();
 		}
-
+		view.setText(data);
 	}
-	
-	@Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.options_menu, menu);
-        return true;
-    }
-	
-	 @Override
-	    public boolean onOptionsItemSelected(MenuItem item) {
-	        switch(item.getItemId()) {
-	        case R.id.menu_quit:
-	               finish();
-	                break;
-	        case R.id.menu_about:
-	                final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-	                alertDialog.setIcon(R.drawable.icon);
-	                alertDialog.setTitle("Visa Vale");
-	                alertDialog.setMessage("Desenvolvido por Alexandre Possebom <alexandrepossebom@gmail.com>");
-	                alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
-	                        public void onClick(DialogInterface dialog, int which) {
-	                                alertDialog.dismiss();
-	                        }
-	                });
-	                alertDialog.show();
-	                break;
-//	        case R.id.menu_prefs:
-//	                startActivityForResult(new Intent(this, Preferences.class), PREFS_REQUEST);
-//	                break;
-	        }
-	        return true;
-	    }
 
-	
-	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.options_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()) {
+		case R.id.menu_quit:
+			finish();
+			break;
+		case R.id.menu_about:
+			final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+			alertDialog.setIcon(R.drawable.icon);
+			alertDialog.setTitle("Visa Vale");
+			alertDialog.setMessage("Desenvolvido por Alexandre Possebom <alexandrepossebom@gmail.com>");
+			alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					alertDialog.dismiss();
+				}
+			});
+			alertDialog.show();
+			break;
+		}
+		return true;
+	}
 }

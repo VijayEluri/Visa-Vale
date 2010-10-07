@@ -83,6 +83,8 @@ public class Main extends Activity {
 						if(line.contains("Saldo d") )
 						{
 							sb.append(line.replaceAll("\\<.*?>","").replaceAll("dispo.*vel:", " : ").trim());
+							sb.append("\n");
+							sb.append(getDate());
 						}
 						
 					}

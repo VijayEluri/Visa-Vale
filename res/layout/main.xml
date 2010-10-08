@@ -15,10 +15,9 @@
 
 		android:text="Numero do Cartão:" />
 
-
-	<EditText android:layout_width="fill_parent"
+	<EditText android:layout_width="fill_parent" android:gravity="center"
 		android:layout_height="wrap_content" android:id="@+id/cardNumber"
-		android:text="" android:inputType="number"/>
+		android:text="" android:inputType="number" android:maxLength="16"/>
 
 
 	<Button android:id="@+id/button" android:layout_width="fill_parent"

@@ -9,18 +9,6 @@
 
 package com.possebom.visavale;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -36,68 +24,37 @@ public class History extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.dialoglayout);
 		final TextView view = (TextView)findViewById(R.id.view);
-		view.setText(getUrl());
-	}
-
-	private String getUrl() {
+		final TextView viewSaldo = (TextView)findViewById(R.id.viewSaldo);
 		SharedPreferences settings = getSharedPreferences("VisaValePrefs", 0);
-		URI myURL = null;
-		try {
-			myURL = new URI("http://www.cbss.com.br/inst/convivencia/SaldoExtrato.jsp?numeroCartao=" + settings.getString("cardNumber", ""));
-		} catch (URISyntaxException e1) {
-			e1.printStackTrace();
+		
+		String data = settings.getString("saldo", "");
+		String[] items = data.split("\n");
+		StringBuffer sb = new StringBuffer();
+		StringBuffer sbSaldo = new StringBuffer();
+		
+		int length = 0;
+		for (String item : items)
+		{
+			if(item.length() > length)
+				length = item.length();
 		}
-
-		HttpClient httpClient = new DefaultHttpClient();
-		HttpGet getMethod = new HttpGet(myURL);
-		HttpResponse httpResponse;
-
-		String result = "Erro pegando dados.";
-
-		try {
-			httpResponse = httpClient.execute(getMethod);
-			HttpEntity entity = httpResponse.getEntity();
-			if (entity != null) {
-				InputStream instream = entity.getContent();
-				BufferedReader reader = new BufferedReader( new InputStreamReader(instream));
-				StringBuilder sb = new StringBuilder();
-				String line = null;
-				try {
-					while ((line = reader.readLine()) != null) {
-						if(line.contains("lido."))
-						{
-							sb.append("Cartão Inválido");
-							break;
-						}
-						if(line.contains("topTable"))
-								continue;
-						if(line.contains("400px") )
-						{
-							sb.append(line.replaceAll("\\<.*?>","").replaceAll("\\&nbsp\\;", " ").trim()).append(" - ");
-						}
-						if(line.contains("50px") )
-						{
-							if(line.contains("R"))
-								sb.append(line.replaceAll("\\<.*?>","").replaceAll("\\&nbsp\\;", " ").trim()).append("\n");
-							else if (line.contains("/"))
-								sb.append(line.replaceAll("\\<.*?>","").replaceAll("\\&nbsp\\;", " ").trim()).append(" - ");
-						}
-
-					}
-				} catch (Exception e) {
-					result = "Erro carregando dados.";
-				} finally {
-					try {
-						instream.close();
-					} catch (Exception e) {
-						result = "Erro carregando dados.";
-					}
+		
+		for (String item : items)
+		{
+			if(item.contains(" - "))
+			{
+				int temp = item.length();
+				while(temp <= length)
+				{
+					item = item.replaceAll("- R\\$", " - R\\$");
+					temp = item.length();
 				}
-				result = sb.toString();
+				sb.append(item).append("\n");
 			}
-		} catch (Exception e) {
-			result = "Erro carregando dados.";
+			else
+				sbSaldo.append(item).append("\n");
 		}
-		return result;
+		view.setText(sb.toString());
+		viewSaldo.setText(sbSaldo.toString());
 	}
 }

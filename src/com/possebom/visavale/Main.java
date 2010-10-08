@@ -41,7 +41,7 @@ public class Main extends Activity {
 		final TextView view = (TextView)findViewById(R.id.view);
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 		cardNumber.setText(settings.getString("cardNumber", ""));
-		view.setText(settings.getString("saldo", ""));
+		view.setText(clearHistory(settings.getString("saldo", "")));
 
 		button.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -80,6 +80,20 @@ public class Main extends Activity {
 							sb.append("Cartão Inválido");
 							break;
 						}
+						if(line.contains("topTable"))
+							continue;
+					if(line.contains("400px") )
+					{
+						sb.append(line.replaceAll("\\<.*?>","").replaceAll("\\&nbsp\\;", " ").trim()).append(" - ");
+					}
+					if(line.contains("50px") )
+					{
+						if(line.contains("R"))
+							sb.append(line.replaceAll("\\<.*?>","").replaceAll("\\&nbsp\\;", " ").trim()).append("\n");
+						else if (line.contains("/"))
+							sb.append(line.replaceAll("\\<.*?>","").replaceAll("\\&nbsp\\;", " ").trim()).append(" - ");
+					}
+						
 						if(line.contains("Saldo d") )
 						{
 							sb.append(line.replaceAll("\\<.*?>","").replaceAll("dispo.*vel:", " : ").trim());
@@ -124,8 +138,16 @@ public class Main extends Activity {
 			editor.putString("saldo", data);
 			editor.putString("cardNumber", cardNumber.getText().toString());
 			editor.commit();
+			
 		}
-		view.setText(data);
+		view.setText(clearHistory(data));
+	}
+	
+	private String clearHistory(String str)
+	{
+		String[] oi = str.split("\n");
+		str = oi[oi.length-2] + "\n" + oi[oi.length-1];
+		return str;
 	}
 
 	@Override
@@ -138,7 +160,7 @@ public class Main extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
-		case R.id.menu_quit:
+		case R.id.menu_quit:			
 			finish();
 			break;
 		case R.id.menu_about:

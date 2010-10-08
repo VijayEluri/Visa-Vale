@@ -146,6 +146,8 @@ public class Main extends Activity {
 	private String clearHistory(String str)
 	{
 		String[] oi = str.split("\n");
+		if(oi.length < 3)
+			return str;		
 		str = oi[oi.length-2] + "\n" + oi[oi.length-1];
 		return str;
 	}

@@ -8,8 +8,13 @@
 		android:layout_weight="0" android:layout_gravity="center"
 		android:scaleType="fitXY" />
 
+<ScrollView android:id="@+id/ScrollView01"
+ android:layout_width="fill_parent"
+ android:layout_height="150px">
+
 	<TextView android:id="@+id/view" android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:padding="10px" android:typeface="monospace" ></TextView>
+		android:layout_height="wrap_content" android:typeface="monospace" ></TextView>
+</ScrollView>
 		
 	<TextView android:id="@+id/viewSaldo"
 		android:layout_height="wrap_content"  android:layout_width="fill_parent" android:gravity="center"></TextView>

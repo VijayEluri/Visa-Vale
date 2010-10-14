@@ -49,7 +49,7 @@ public class History extends Activity {
 					item = item.replaceAll("- R\\$", " - R\\$");
 					temp = item.length();
 				}
-				sb.append(item).append("\n");
+				sb.append(item.replaceAll(" - ", " ")).append("\n");
 			}
 			else
 				sbSaldo.append(item).append("\n");

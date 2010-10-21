@@ -12,6 +12,7 @@ package com.possebom.visavale;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Html;
 import android.widget.TextView;
 
 import com.possebom.visavale.R;
@@ -26,35 +27,46 @@ public class History extends Activity {
 		final TextView view = (TextView)findViewById(R.id.view);
 		final TextView viewSaldo = (TextView)findViewById(R.id.viewSaldo);
 		SharedPreferences settings = getSharedPreferences("VisaValePrefs", 0);
-		
+
 		String data = settings.getString("saldo", "");
 		String[] items = data.split("\n");
 		StringBuffer sb = new StringBuffer();
 		StringBuffer sbSaldo = new StringBuffer();
-		
-		int length = 0;
-		for (String item : items)
-		{
-			if(item.length() > length)
-				length = item.length();
-		}
-		
+
+
+		int i=0;
 		for (String item : items)
 		{
 			if(item.contains(" - "))
 			{
-				int temp = item.length();
-				while(temp <= length)
-				{
-					item = item.replaceAll("- R\\$", " - R\\$");
-					temp = item.length();
-				}
-				sb.append(item.replaceAll(" - ", " ")).append("\n");
+				i++;
+				if(i%2==0)
+					sb.append("<font color=white>");
+				else
+					sb.append("<font color=yellow>");
+					
+				String[] dados = item.split(" - ");
+				String dia = dados[0];
+				String nome = dados[1];
+				String valor = dados[2];
+
+				sb.append(dia);
+				sb.append(" ");
+
+				if(nome.length() > 20)
+					sb.append(nome.substring(0, 20));
+				else
+					sb.append(String.format("%1$-20s", nome).replaceAll(" ", "&nbsp;"));
+				sb.append(" ");
+				sb.append(valor);
+				sb.append("<br>\n");	
+				sb.append("</font>");
 			}
 			else
-				sbSaldo.append(item).append("\n");
+				sbSaldo.append(item).append("\n");			
 		}
-		view.setText(sb.toString());
+
+		view.setText(Html.fromHtml(sb.toString()));
 		viewSaldo.setText(sbSaldo.toString());
 	}
 }

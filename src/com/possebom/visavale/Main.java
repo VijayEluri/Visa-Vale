@@ -16,10 +16,13 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,9 +31,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class Main extends Activity {
+public class Main extends Activity implements Runnable{
 	public static final String PREFS_NAME = "VisaValePrefs";
-
+	private ProgressDialog progressDialog;
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -82,25 +86,25 @@ public class Main extends Activity {
 						}
 						if(line.contains("topTable"))
 							continue;
-					if(line.contains("400px") )
-					{
-						sb.append(line.replaceAll("\\<.*?>","").replaceAll("\\&nbsp\\;", " ").trim()).append(" - ");
-					}
-					if(line.contains("50px") )
-					{
-						if(line.contains("R"))
-							sb.append(line.replaceAll("\\<.*?>","").replaceAll("\\&nbsp\\;", " ").trim()).append("\n");
-						else if (line.contains("/"))
+						if(line.contains("400px") )
+						{
 							sb.append(line.replaceAll("\\<.*?>","").replaceAll("\\&nbsp\\;", " ").trim()).append(" - ");
-					}
-						
+						}
+						if(line.contains("50px") )
+						{
+							if(line.contains("R"))
+								sb.append(line.replaceAll("\\<.*?>","").replaceAll("\\&nbsp\\;", " ").trim()).append("\n");
+							else if (line.contains("/"))
+								sb.append(line.replaceAll("\\<.*?>","").replaceAll("\\&nbsp\\;", " ").trim()).append(" - ");
+						}
+
 						if(line.contains("Saldo d") )
 						{
 							sb.append(line.replaceAll("\\<.*?>","").replaceAll("dispo.*vel:", " : ").trim());
 							sb.append("\n");
 							sb.append(getDate());
 						}
-						
+
 					}
 				} catch (Exception e) {
 					result = "Erro carregando dados.";
@@ -126,23 +130,34 @@ public class Main extends Activity {
 		return sdf.format(cal.getTime());
 	}
 
-	private void updateView() {          
-		final TextView view = (TextView)findViewById(R.id.view);
-		final EditText cardNumber = (EditText)findViewById(R.id.cardNumber); 
-		view.setText("Carregando dados...");
-		String data = getUrl();
-		if(data.contains("Saldo"))
-		{
-			SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-			SharedPreferences.Editor editor = settings.edit();
-			editor.putString("saldo", data);
-			editor.putString("cardNumber", cardNumber.getText().toString());
-			editor.commit();
-			
-		}
-		view.setText(clearHistory(data));
+	private void updateView() {         
+		Thread thread = new Thread(this);
+		thread.start();
+		progressDialog = ProgressDialog.show(this, "Atualizando Saldo", "Carregando dados", true, false);
 	}
 	
+	 private Handler handler = new Handler() {
+         @Override
+         public void handleMessage(Message msg) {
+              
+     		final TextView view = (TextView)findViewById(R.id.view);
+    		final EditText cardNumber = (EditText)findViewById(R.id.cardNumber); 
+    		view.setText("Carregando dados...");
+    		String data = getUrl();
+    		if(data.contains("Saldo"))
+    		{
+    			SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+    			SharedPreferences.Editor editor = settings.edit();
+    			editor.putString("saldo", data);
+    			editor.putString("cardNumber", cardNumber.getText().toString());
+    			editor.commit();
+
+    		}
+    		view.setText(clearHistory(data));
+    		progressDialog.dismiss();
+         }
+ };
+
 	private String clearHistory(String str)
 	{
 		String[] oi = str.split("\n");
@@ -184,4 +199,22 @@ public class Main extends Activity {
 
 		return true;
 	}
+
+	public void run() {
+
+		String data = getUrl();
+		if(data.contains("Saldo"))
+		{
+			SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putString("saldo", data);
+			editor.commit();
+
+		}
+		 handler.sendEmptyMessage(0);
+	}
+
+
+
+	
 }
